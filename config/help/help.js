@@ -51,6 +51,11 @@ export const helpList = [
         "group": "实用功能",
         "list": [
             {
+                "icon": 91,
+                "title": "#不羡仙管理帮助",
+                "desc": "获取不羡仙群管有管号管功能"
+            },
+            {
                 "icon": 89,
                 "title": "#设置主人 主人QQ:机器人QQ",
                 "desc": "一键设置新主人！【仅主人权限可用】"
