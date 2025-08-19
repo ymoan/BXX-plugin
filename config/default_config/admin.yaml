@@ -1,0 +1,18 @@
+# 给自己一个备注：不要隔行或修改已配置行！因为程序验证权限是根据行数验证的！！
+# 示例：ALL: true
+# 网站信息获取是否允许所有人可用
+WZXXALL: true
+# 端口扫描是否允许所有人可用
+DKSMALL: false
+# Whois域名查询是否允许所有人可用
+WSYMALL: false
+# 二维码生成是否允许所有人可用
+RWMALL: true
+# ICP备案查询是否所有人可用
+ICPALL: true
+# 抖音视频解析是否允许所有人可用
+DYJXALL: true
+# 综合视频解析是否允许所有人可用
+ZHJXALL: true
+# 邮件发送所有人可用
+YXFSALL: true

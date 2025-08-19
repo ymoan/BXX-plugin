@@ -1,0 +1,10 @@
+# 网站信息API
+WZXXAPI: "https://api.nanyinet.com/api/gateway/website/api.php"
+# 端口扫描API
+DKSMAPI: "https://api.nanyinet.com/api/gateway/port/api.php"
+# Whois域名查询API
+YMCXAPI: "https://api.nanyinet.com/api/gateway/whois/api.php"
+# 二维码生成API
+RWMAPI: "https://api.nanyinet.com/api/gateway/qrcode/api.php"
+# ICP查询API
+ICPAPI: "https://api.nanyinet.com/api/gateway/icp/api.php"
