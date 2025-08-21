@@ -28,7 +28,7 @@ export class Updates extends plugin {
         
         if (e.at && !e.atme) return;
         
-        e.msg = `#${e.msg.includes("强制") ? "强制" : ""}更新BXX-plugin`;
+        e.msg = `#${e.msg.includes("强制") ? "强制" : ""}更新不羡仙`;
 
         const up = new Update(e);
         up.e = e;
