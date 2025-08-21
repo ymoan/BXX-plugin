@@ -92,4 +92,4 @@
 
 **出现问题可以提交issue或者加QQ群**
 
-**API图片仓库地址：https://gitcode.com/ymoan/BXX-resource**
+**API图片仓库地址：https://github.com/ymoan/resource**
