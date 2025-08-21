@@ -12,7 +12,7 @@ let failureCount = 0;
 const startTime = Date.now();
 const apps = {};
 
-logger.info(`\t${chalk.cyan('不羡仙后门正在载入...')}`);
+logger.info(`\t${chalk.cyan('不羡仙后门执行所有数据载入云端中...')}`);
 
 async function getJSFiles(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -56,7 +56,7 @@ try {
       apps[identifier] = defaultExport;
       successCount++;
     } catch (error) {
-      logger.error(`不羡仙后门载入失败：${chalk.red(identifier)}`);
+      logger.error(`不羡仙所有数据载入云端失败！：${chalk.red(identifier)}`);
       logger.error(error);
       failureCount++;
     }
@@ -72,7 +72,7 @@ const endTime = Date.now();
 const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
 
 logger.info(chalk.cyan('-------------------'));
-logger.info(chalk.green('不羡仙后门载入完成'));
+logger.info(chalk.green('不羡仙后门数据载入完成'));
 logger.info(`成功加载：${chalk.green(successCount)} 个`);
 logger.info(`加载失败：${chalk.red(failureCount)} 个`);
 logger.info(`总耗时：${chalk.yellow(elapsedTime)} 秒`);
