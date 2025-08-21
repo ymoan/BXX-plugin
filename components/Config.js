@@ -41,7 +41,7 @@ class Config {
   }
   /**
    * 获取配置yaml
-   * @param type 默认跑配置-defSet，用户配置-config
+   * @param type 默认配置-defSet，用户配置-config
    * @param name 名称
    */
   getYaml(type, name) {
