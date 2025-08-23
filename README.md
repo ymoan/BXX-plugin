@@ -7,9 +7,9 @@
 
 **本插件功能优先级可能高于您使用的插件，遇到问题请拉黑功能或删除插件**
 
-**本插件拒绝任何【非合理】提议~如遇到问题<span style="color:#e60000;">卸载本插件</span>或截图＋文字叙述提交或<span style="color:#e60000;">加入QQ群</span>或<span style="color:#e60000;">Yunzai论坛反馈</span><span style="color:#e60000;">issues</span>即可~**
+**本插件拒绝任何【非合理】提议~如遇到问题请卸载本插件或截图＋文字叙述提交issues或加入QQ群或Yunzai论坛反馈即可~**
 
-**如您要参与项目请Pull提交【[点击入库](https://gitcode.com/invite/link/c39042cc41ae448b9527)】欢迎共同参与此项目！**
+**如您要参与项目请Pull提交欢迎共同参与此项目！**
 ****
 ## 暂时咕咕的功能：
 ### 群管功能【踢人禁言通过加群申请好友申请等。。。】留着记一下备忘：（优化验证权限，功能可用者，黑白名单等必要内容）将帮助图分为AB防止内容过多
@@ -58,7 +58,6 @@
 |不羡仙设置|#不羡仙设置 |修改不羡仙配置|
 |更新|#不羡仙更新|更新插件|
 
-
 ****
 
 # 😂更新：
@@ -71,9 +70,6 @@
 **QQ群：[872488071](https://qm.qq.com/q/SA5dEJf6MM)**
 
 **云崽论坛：[Yunzai论坛/文档](https://yunz.cc)**
-
-
-
 
 # 😊友情链接：
 [Miao-Yunzai](https://gitee.com/yoimiya-kokomi/Miao-Yunzai)😠
@@ -89,7 +85,5 @@
 # 😍其他：
 
 **素材来源于网络，仅供交流学习使用，严禁用于商业和非法用途**
-
-**出现问题可以提交issue或者加QQ群**
 
 **API图片仓库地址：https://github.com/ymoan/resource**
