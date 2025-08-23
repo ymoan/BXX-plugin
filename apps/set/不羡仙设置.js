@@ -21,7 +21,6 @@ export default class BXXConfig extends plugin {
     getPluginPath(relativePath) {
         return path.resolve(this.rootPath, 'plugins/BXX-plugin', relativePath);
     }
-    
     async showConfig(e) {
         const configPath = this.getPluginPath('config/config/admin.yaml');
         let statusMap = {};
