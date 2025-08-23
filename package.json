@@ -1,6 +1,6 @@
 {
   "name": "BXX-plugin",
-  "version": "V 0.2.7",
+  "version": "V 0.2.8",
   "author": "@ymoan",
   "type": "module",
   "dependencies": {
