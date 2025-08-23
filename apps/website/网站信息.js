@@ -12,7 +12,6 @@ export default class extends plugin {
             priority: 5000,
             rule: [
                 {
-                    // 优化正则表达式，确保匹配所有格式
                     reg: '^#网站信息\\s*[\\+\\s]*(https?:\\/\\/[^\\s]+)',
                     fnc: 'getWebsiteInfo'
                 }
@@ -56,7 +55,6 @@ export default class extends plugin {
 
             const apiFullUrl = `${apiUrl}?apikey=${apiKey}&url=${encodeURIComponent(url)}`;
             console.log(`请求API: ${apiFullUrl}`);
-            
             const response = await axios.get(apiFullUrl, { timeout: 15000 });
             const res = response.data;
             console.log(`API响应: ${JSON.stringify(res)}`);
@@ -82,82 +80,23 @@ export default class extends plugin {
         try {
             if (fs.existsSync(adminPath)) {
                 const adminConfig = fs.readFileSync(adminPath, 'utf8');
-                const wzxxAll = adminConfig.match(/WZXXALL:\s*(true|false)/);
+                const wzxxAllMatch = adminConfig.match(/WZXXALL:\s*(true|false)/i); 
                 
-                if (wzxxAll && wzxxAll[1] === 'true') {
-                    console.log('权限检查: 所有人可用');
+                if (wzxxAllMatch && wzxxAllMatch[1].toLowerCase() === 'true') {
+                    console.log('权限检查: 所有人可用（WZXXALL为true）');
                     return true;
                 }
+            } else {
+                console.error('[网站信息权限] admin.yaml文件不存在，默认关闭所有人可用');
             }
+
+            console.log(`权限检查: 验证主人权限（e.isMaster=${e.isMaster}）`);
+            return e.isMaster;
+
         } catch (err) {
-            console.error('读取权限配置失败:', err);
+            console.error('网站信息权限检查失败:', err);
+            return e.isMaster;
         }
-
-        return this.checkMaster(e);
-    }
-
-    async checkMaster(e) {
-        const otherPath = path.join(
-            process.cwd(), 
-            'config/config/other.yaml'
-        );
-
-        try {
-            if (fs.existsSync(otherPath)) {
-                const otherConfig = fs.readFileSync(otherPath, 'utf8');
-                const userId = e.user_id;
-                console.log(`检查用户权限: ${userId}`);
-                
-                if (otherConfig.includes('masterQQ:')) {
-                    const masterQQRegex = /masterQQ:\s*[\r\n]+([\s\S]*?)(?=\r?\n\w|$)/;
-                    const masterQQMatch = otherConfig.match(masterQQRegex);
-                    
-                    if (masterQQMatch) {
-                        const masterQQList = masterQQMatch[1].split('\n')
-                            .filter(line => line.trim().startsWith('-'))
-                            .map(line => line.replace(/^-\s*/, '').trim());
-                        
-                        console.log(`masterQQ列表: ${JSON.stringify(masterQQList)}`);
-                        
-                        if (masterQQList.includes(userId.toString())) {
-                            console.log('权限检查: 用户是masterQQ');
-                            return true;
-                        }
-                    }
-                }
-                
-                if (otherConfig.includes('master:')) {
-                    const masterRegex = /master:\s*[\r\n]+([\s\S]*?)(?=\r?\n\w|$)/;
-                    const masterMatch = otherConfig.match(masterRegex);
-                    
-                    if (masterMatch) {
-                        const masterList = masterMatch[1].split('\n')
-                            .filter(line => line.trim().startsWith('-'))
-                            .map(line => line.replace(/^-\s*/, '').trim());
-                        
-                        console.log(`master列表: ${JSON.stringify(masterList)}`);
-                        
-                        for (const item of masterList) {
-                            if (item.includes(':')) {
-                                const parts = item.split(':');
-                                if (parts.length >= 2 && parts[parts.length - 1] === userId.toString()) {
-                                    console.log('权限检查: 用户是master');
-                                    return true;
-                                }
-                            } else if (item === userId.toString()) {
-                                console.log('权限检查: 用户是master');
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (err) {
-            console.error('读取主人配置失败:', err);
-        }
-        
-        console.log('权限检查: 用户无权限');
-        return false;
     }
 
     async getApiConfig() {
@@ -216,7 +155,6 @@ export default class extends plugin {
 
         const logoUrl = data.favicon || '';
         let logoPath = '';
-        
         if (logoUrl) {
             try {
                 let validUrl = logoUrl;
@@ -264,7 +202,6 @@ export default class extends plugin {
 
         await e.reply(msg);
         console.log('网站信息已发送');
-
         if (logoPath && fs.existsSync(logoPath)) {
             setTimeout(() => {
                 fs.unlink(logoPath, (err) => {

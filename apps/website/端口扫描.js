@@ -104,7 +104,6 @@ export default class PortScanPlugin extends plugin {
         return [host, port];
     }
 
-
     getApiConfig() {
         try {
             const basePath = path.join(process.cwd(), 'plugins/BXX-plugin');
@@ -124,7 +123,6 @@ export default class PortScanPlugin extends plugin {
         }
     }
 
-
     getErrorMessage(code) {
         const errors = {
             100: 'API密钥为空',
@@ -135,56 +133,25 @@ export default class PortScanPlugin extends plugin {
         return errors[code] || `未知错误 (代码: ${code})`;
     }
 
-
     async checkPermission(e) {
         try {
             const basePath = path.join(process.cwd(), 'plugins/BXX-plugin');
-            
-
             const adminPath = path.join(basePath, 'config/config/admin.yaml');
-            if (!fs.existsSync(adminPath)) {
-                console.error('[权限检查] admin.yaml文件不存在');
-                return false;
-            }
-            
-            const adminContent = fs.readFileSync(adminPath, 'utf8');
-            const adminConfig = yaml.parse(adminContent);
-            
-            if (adminConfig.DKSMALL === true) {
-                return true; 
-            }
-            
-
-            const otherPath = path.join(process.cwd(), 'config/config/other.yaml');
-            if (!fs.existsSync(otherPath)) {
-                console.error('[权限检查] other.yaml文件不存在');
-                return false;
-            }
-            
-            const otherContent = fs.readFileSync(otherPath, 'utf8');
-            const otherConfig = yaml.parse(otherContent);
-            const userId = e.user_id.toString();
-            const masterQQ = otherConfig.masterQQ || [];
-            const masters = otherConfig.master || [];
-            
-
-            if (masterQQ.some(qq => qq.toString() === userId)) {
-                return true;
-            }
-            
-
-            const isMaster = masters.some(entry => {
-                if (typeof entry === 'string') {
-                    const parts = entry.split(':');
-                    return parts[0] === userId;
+            if (fs.existsSync(adminPath)) {
+                const adminContent = fs.readFileSync(adminPath, 'utf8');
+                const adminConfig = yaml.parse(adminContent);
+                if (adminConfig.DKSMALL === true) {
+                    return true;
                 }
-                return false;
-            });
-            
-            return isMaster;
+            } else {
+                console.error('[端口扫描权限] admin.yaml文件不存在，默认关闭所有人可用');
+            }
+
+            return e.isMaster;
+
         } catch (err) {
-            console.error('权限检查失败:', err);
-            return false;
+            console.error('端口扫描权限检查失败:', err);
+            return e.isMaster;
         }
     }
 }

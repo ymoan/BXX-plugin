@@ -24,15 +24,6 @@ export class uninstall extends plugin {
   static pendingUninstall = new Map()
 
   getUserId(e) { return e.sender?.user_id || e.user_id }
-
-  async isMaster(userId) {
-    try {
-      const config = yaml.parse(await fs.promises.readFile(this.configPath, 'utf8'))
-      const userIdStr = String(userId)
-      return config.masterQQ?.includes(userIdStr) || config.master?.some(item => item.split(':')[1] === userIdStr)
-    } catch (err) { return false }
-  }
-
   isAdmin() {
     if (process.platform !== 'win32') return true
     try {
@@ -50,8 +41,12 @@ export class uninstall extends plugin {
   }
 
   async startUninstall(e) {
+    if (!e.isMaster) {
+      await e.reply("暂无权限，只有主人才能操作");
+      return true;
+    }
+
     const userId = this.getUserId(e)
-    if (!await this.isMaster(userId)) return e.reply('只有主人可以执行该命令') && true
     if (!this.isAdmin()) e.reply('⚠️ 检测到当前进程无管理员权限，部分文件可能无法删除\n将尝试删除允许的文件和文件夹')
     if (uninstall.pendingUninstall.has(userId)) return e.reply('您已有一个卸崽操作在进行中，请完成确认或取消') && true
 
@@ -82,6 +77,7 @@ export class uninstall extends plugin {
   async confirmUninstall(e) {
     const userId = this.getUserId(e)
     const userState = uninstall.pendingUninstall.get(userId)
+
     if (!userState) return e.reply('您尚未开始卸崽流程，请先发送 #一键卸崽 启动') && false
 
     clearTimeout(userState.timeout)
@@ -155,8 +151,12 @@ export class uninstall extends plugin {
   }
 
   async cancelUninstall(e) {
+    if (!e.isMaster) {
+      await e.reply("暂无权限，只有主人才能操作");
+      return true;
+    }
+
     const userId = this.getUserId(e)
-    if (!await this.isMaster(userId)) return e.reply('只有主人可以执行该命令') && true
     const userState = uninstall.pendingUninstall.get(userId)
     if (!userState) return e.reply('当前没有进行中的卸崽操作') && true
     clearTimeout(userState.timeout)

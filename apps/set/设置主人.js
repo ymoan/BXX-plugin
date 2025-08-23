@@ -21,9 +21,9 @@ export class setMaster extends plugin {
   }
 
   async setMaster(e) {
-    if (!(await this.isMaster(e.user_id))) {
-      await e.reply('只有主人可以执行该命令')
-      return true
+    if (!e.isMaster) {
+      await e.reply("暂无权限，只有主人才能操作");
+      return true;
     }
 
     const match = e.msg.match(/^#设置主人\s*(\S+):(\S+)$/)
@@ -53,29 +53,6 @@ export class setMaster extends plugin {
 
   isValidQQ(qq) {
     return /^(\d+|qg_\w+|stdin)$/.test(qq)
-  }
-
-  async isMaster(userId) {
-    try {
-      const config = await this.readConfig()
-      const userIdStr = String(userId)
-      
-      if (config.masterQQ && config.masterQQ.includes(userIdStr)) {
-        return true
-      }
-      
-      if (config.master) {
-        for (const item of config.master) {
-          const parts = item.split(':')
-          if (parts.length >= 2 && parts[1] === userIdStr) {
-            return true
-          }
-        }
-      }
-    } catch (err) {
-      console.error('读取配置文件失败:', err)
-    }
-    return false
   }
 
   async readConfig() {

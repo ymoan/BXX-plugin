@@ -88,7 +88,6 @@ export default class QRCodeGenerator extends plugin {
                 `✅ 二维码生成成功: ${inputText}`
             ]);
             
-            // 延迟删除文件（5秒后）
             setTimeout(() => {
                 try {
                     fs.unlinkSync(filePath);
@@ -137,7 +136,6 @@ export default class QRCodeGenerator extends plugin {
             const keyContent = fs.readFileSync(keyPath, 'utf8');
             const keyConfig = yaml.parse(keyContent);
             const apiKey = keyConfig.RWMKEY;
-            
             return [apiUrl, apiKey];
         } catch (err) {
             console.error('读取API配置失败:', err);
@@ -149,45 +147,21 @@ export default class QRCodeGenerator extends plugin {
         try {
             const basePath = path.join(process.cwd(), 'plugins/BXX-plugin');
             const adminPath = path.join(basePath, 'config/config/admin.yaml');
-            if (!fs.existsSync(adminPath)) {
-                console.error('[权限检查] admin.yaml文件不存在');
-                return false;
-            }
-            
-            const adminContent = fs.readFileSync(adminPath, 'utf8');
-            const adminConfig = yaml.parse(adminContent);
-            
-            if (adminConfig.RWMALL === true) {
-                return true; 
-            }
-            
-            const otherPath = path.join(process.cwd(), 'config/config/other.yaml');
-            if (!fs.existsSync(otherPath)) {
-                console.error('[权限检查] other.yaml文件不存在');
-                return false;
-            }
-            
-            const otherContent = fs.readFileSync(otherPath, 'utf8');
-            const otherConfig = yaml.parse(otherContent);
-            const userId = e.user_id.toString();
-            const masterQQ = otherConfig.masterQQ || [];
-            if (masterQQ.some(qq => qq.toString() === userId)) {
-                return true;
-            }
-            
-            const masters = otherConfig.master || [];
-            const isMaster = masters.some(entry => {
-                if (typeof entry === 'string') {
-                    const parts = entry.split(':');
-                    return parts[0] === userId;
+            if (fs.existsSync(adminPath)) {
+                const adminContent = fs.readFileSync(adminPath, 'utf8');
+                const adminConfig = yaml.parse(adminContent);
+                if (adminConfig.RWMALL === true) {
+                    return true;
                 }
-                return false;
-            });
-            
-            return isMaster;
+            } else {
+                console.error('[二维码生成权限] admin.yaml文件不存在，默认关闭所有人可用');
+            }
+
+            return e.isMaster;
+
         } catch (err) {
-            console.error('权限检查失败:', err);
-            return false;
+            console.error('二维码生成权限检查失败:', err);
+            return e.isMaster;
         }
     }
 }
