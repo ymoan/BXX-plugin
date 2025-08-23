@@ -1,7 +1,7 @@
 {
   "name": "BXX-plugin",
-  "version": "V 1.0.1",
-  "author": "@BXXjs",
+  "version": "V 0.2.7",
+  "author": "@ymoan",
   "type": "module",
   "dependencies": {
       "axios": "^0.24.0",
