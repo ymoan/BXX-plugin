@@ -1,59 +1,48 @@
 import plugin from '../../../../lib/plugins/plugin.js'
 import { Render } from '../../components/index.js'
-import { helpCfg, helpList } from '../../config/help/Group.js'
+import { helpCfg, helpList } from '../../config/help/webhelp.js'
 import { style } from '../../resources/help/imgs/config.js'
 import _ from 'lodash'
 
-export class GroupHelp extends plugin {
+export class WebHelp extends plugin {
     constructor() {
         super({
-            name: '[BXX-plugin] 群组帮助',
-            dsc: '[BXX-plugin] 群组相关帮助功能',
+            name: '[BXX-plugin] 站长帮助',
+            dsc: '[BXX-plugin] 站长相关帮助功能',
             event: 'message',
             priority: 1,
-            rule: [
-                {
-                    reg: /^#?(不羡仙|BXX)(管理帮助|Grouphelp|管理菜单)$/i,
-                    fnc: 'groupHelp'
-                }
-            ]
+            rule: [{
+                reg: /^#?(不羡仙|BXX)(站长帮助|webhelp|站长菜单)$/i,
+                fnc: 'webHelp'
+            }]
         })
     }
 
-    async groupHelp(e) {
+    async webHelp(e) {
         let helpGroup = []
         _.forEach(helpList, (group) => {
             _.forEach(group.list, (help) => {
                 let icon = help.icon * 1
-                if (!icon) {
-                    help.css = 'display:none'
-                } else {
+                if (!icon) help.css = 'display:none'
+                else {
                     let x = (icon - 1) % 10
                     let y = (icon - x - 1) / 10
                     help.css = `background-position:-${x * 50}px -${y * 50}px`
                 }
             })
-
             helpGroup.push(group)
         })
 
         let themeData = await getThemeData(helpCfg, helpCfg)
         return await Render.render('help/index', {
-            helpCfg,
-            helpGroup,
-            ...themeData,
-            element: 'default'
+            helpCfg, helpGroup, ...themeData, element: 'default'
         }, { e, scale: 1.6 })
     }
 }
 
 async function getThemeCfg() {
     let resPath = '{{_res_path}}/help/imgs/'
-    return {
-        main: `${resPath}/main.png`,
-        bg: `${resPath}/bg.jpg`,
-        style: style
-    }
+    return { main: `${resPath}/main.png`, bg: `${resPath}/bg.jpg`, style: style }
 }
 
 async function getThemeData(diyStyle, sysStyle) {
@@ -70,9 +59,7 @@ async function getThemeData(diyStyle, sysStyle) {
     `]
     let css = function (sel, css, key, def, fn) {
         let val = getDef(themeStyle[key], diyStyle[key], sysStyle[key], def)
-        if (fn) {
-            val = fn(val)
-        }
+        if (fn) val = fn(val)
         ret.push(`${sel}{${css}:${val}}`)
     }
     css('.help-title,.help-group', 'color', 'fontColor', '#ceb78b')
@@ -83,17 +70,9 @@ async function getThemeData(diyStyle, sysStyle) {
     css('.help-group', 'background', 'headerBgColor', 'rgba(34, 41, 51, .4)')
     css('.help-table .tr:nth-child(odd)', 'background', 'rowBgColor1', 'rgba(34, 41, 51, .2)')
     css('.help-table .tr:nth-child(even)', 'background', 'rowBgColor2', 'rgba(34, 41, 51, .4)')
-    return {
-        style: `<style>${ret.join('\n')}</style>`,
-        colCount
-    }
+    return { style: `<style>${ret.join('\n')}</style>`, colCount }
 }
 
 function getDef() {
-    for (let idx in arguments) {
-        if (!_.isUndefined(arguments[idx])) {
-            return arguments[idx]
-        }
-    }
+    for (let idx in arguments) if (!_.isUndefined(arguments[idx])) return arguments[idx]
 }
-

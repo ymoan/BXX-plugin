@@ -1,26 +1,26 @@
 import plugin from '../../../../lib/plugins/plugin.js'
 import { Render } from '../../components/index.js'
-import { helpCfg, helpList } from '../../config/help/Group.js'
+import { helpCfg, helpList } from '../../config/help/playhelp.js'
 import { style } from '../../resources/help/imgs/config.js'
 import _ from 'lodash'
 
-export class GroupHelp extends plugin {
+export class PlayHelp extends plugin {
     constructor() {
         super({
-            name: '[BXX-plugin] 群组帮助',
-            dsc: '[BXX-plugin] 群组相关帮助功能',
+            name: '[BXX-plugin] 娱乐帮助',
+            dsc: '[BXX-plugin] 娱乐相关帮助功能',
             event: 'message',
             priority: 1,
             rule: [
                 {
-                    reg: /^#?(不羡仙|BXX)(管理帮助|Grouphelp|管理菜单)$/i,
-                    fnc: 'groupHelp'
+                    reg: /^#?(不羡仙|BXX)(娱乐帮助|playhelp|娱乐菜单)$/i,
+                    fnc: 'playHelp'
                 }
             ]
         })
     }
 
-    async groupHelp(e) {
+    async playHelp(e) {
         let helpGroup = []
         _.forEach(helpList, (group) => {
             _.forEach(group.list, (help) => {
@@ -96,4 +96,3 @@ function getDef() {
         }
     }
 }
-

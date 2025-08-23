@@ -1,26 +1,26 @@
 import plugin from '../../../../lib/plugins/plugin.js'
 import { Render } from '../../components/index.js'
-import { helpCfg, helpList } from '../../config/help/Group.js'
+import { helpCfg, helpList } from '../../config/help/toolhelp.js'
 import { style } from '../../resources/help/imgs/config.js'
 import _ from 'lodash'
 
-export class GroupHelp extends plugin {
+export class ToolHelp extends plugin {
     constructor() {
         super({
-            name: '[BXX-plugin] 群组帮助',
-            dsc: '[BXX-plugin] 群组相关帮助功能',
+            name: '[BXX-plugin] 工具帮助',
+            dsc: '[BXX-plugin] 工具相关帮助功能',
             event: 'message',
             priority: 1,
             rule: [
                 {
-                    reg: /^#?(不羡仙|BXX)(管理帮助|Grouphelp|管理菜单)$/i,
-                    fnc: 'groupHelp'
+                    reg: /^#?(不羡仙|BXX)(工具帮助|toolhelp|工具菜单)$/i,
+                    fnc: 'toolHelp'
                 }
             ]
         })
     }
 
-    async groupHelp(e) {
+    async toolHelp(e) {
         let helpGroup = []
         _.forEach(helpList, (group) => {
             _.forEach(group.list, (help) => {
@@ -33,7 +33,6 @@ export class GroupHelp extends plugin {
                     help.css = `background-position:-${x * 50}px -${y * 50}px`
                 }
             })
-
             helpGroup.push(group)
         })
 
@@ -70,9 +69,7 @@ async function getThemeData(diyStyle, sysStyle) {
     `]
     let css = function (sel, css, key, def, fn) {
         let val = getDef(themeStyle[key], diyStyle[key], sysStyle[key], def)
-        if (fn) {
-            val = fn(val)
-        }
+        if (fn) val = fn(val)
         ret.push(`${sel}{${css}:${val}}`)
     }
     css('.help-title,.help-group', 'color', 'fontColor', '#ceb78b')
@@ -91,9 +88,6 @@ async function getThemeData(diyStyle, sysStyle) {
 
 function getDef() {
     for (let idx in arguments) {
-        if (!_.isUndefined(arguments[idx])) {
-            return arguments[idx]
-        }
+        if (!_.isUndefined(arguments[idx])) return arguments[idx]
     }
 }
-
