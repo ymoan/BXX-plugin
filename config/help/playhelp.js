@@ -41,6 +41,11 @@ export const helpList = [
                 "desc": "获取绝区零最新前瞻"
             },
             {
+                "icon": 51,
+                "title": "#不羡仙图像更新",
+                "desc": "下载/更新原神星铁角色扩展"
+            }
+            {
                 "icon": 99,
                 "title": "#抖音解析+链接",
                 "desc": "解析抖音视频"
