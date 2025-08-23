@@ -1,14 +1,14 @@
-import plugin from '../../../lib/plugins/plugin.js'
-import { Render, Version } from '../components/index.js'
-import { helpCfg, helpList } from '../config/help/help.js'
-import { style } from '../resources/help/imgs/config.js'
+import plugin from '../../../../lib/plugins/plugin.js'
+import { Render, Version } from '../../components/index.js'
+import { helpCfg, helpList } from '../../config/help/Group.js'
+import { style } from '../../resources/help/imgs/config.js'
 import _ from 'lodash'
 
-export class setting extends plugin {
+export class GroupHelp extends plugin {
     constructor() {
         super({
-            name: '[BXX-plugin] 帮助',
-            dsc: '[BXX-plugin] 帮助',
+            name: '[BXX-plugin] 群组帮助',
+            dsc: '[BXX-plugin] 群组相关帮助功能',
             event: 'message',
             priority: 1,
             rule: [
@@ -17,14 +17,13 @@ export class setting extends plugin {
                     fnc: 'version'
                 },
                 {
-                    reg: /^#?(不羡仙|BXX)(帮助|help|菜单)$/i,
-                    fnc: 'help',
-                
+                    reg: /^#?(不羡仙|BXX)(管理帮助|Grouphelp|管理菜单)$/i,
+                    fnc: 'groupHelp'
                 }
             ]
         })
-
     }
+
     async version(e) {
         return await Render.render('help/version-info', {
             currentVersion: Version.version,
@@ -33,7 +32,7 @@ export class setting extends plugin {
         }, { e, scale: 1.2 })
     }
 
-    async help(e) {
+    async groupHelp(e) {
         let helpGroup = []
         _.forEach(helpList, (group) => {
             _.forEach(group.list, (help) => {
@@ -58,7 +57,6 @@ export class setting extends plugin {
             element: 'default'
         }, { e, scale: 1.6 })
     }
-
 }
 
 async function getThemeCfg() {
