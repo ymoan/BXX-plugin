@@ -42,7 +42,7 @@ export const helpList = [
             },
             {
                 "icon": 51,
-                "title": "#不羡仙图像更新",
+                "title": "#不羡仙图像安装/更新",
                 "desc": "下载/更新原神星铁角色扩展"
             },
             {
