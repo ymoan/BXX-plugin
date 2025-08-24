@@ -57,48 +57,62 @@ export class ImageUpdate extends plugin {
         }
     }
 
-    async executeGitCommand(command, cwd, isClone = false) {
+    async executeGitCommand(command, cwd, options = {}) {
+        const { isClone = false, isPull = false } = options;
+        
         return new Promise((resolve) => {
-            let totalFileCount = 0;
-            let changeFileCount = 0;
-            const isPull = command.includes('pull');
-
+            let outputData = '';
+            
             const process = exec(command, { cwd });
 
-            const parseOutput = (data) => {
-                const output = data.toString().trim();
-                if (!output) return;
-                if (isClone) {
-                    const totalMatch = output.match(/Updating files: \d+% \((\d+)\/(\d+)\)/);
-                    if (totalMatch) {
-                        totalFileCount = parseInt(totalMatch[2]);
-                    }
-                } else if (isPull) {
-                    const changeMatch = output.match(/(create|update|delete|modify) mode \d+/);
-                    if (changeMatch) changeFileCount++;
-                }
-            };
-
-            process.stdout.on('data', parseOutput);
+            process.stdout.on('data', (data) => {
+                outputData += data.toString();
+            });
+            
             process.stderr.on('data', (data) => {
-                const output = data.toString().trim();
-                console.log(`git输出: ${output}`);
-                parseOutput(data);
+                outputData += data.toString();
+                console.log(`git输出: ${data.toString().trim()}`);
             });
 
             process.on('close', (code) => {
                 if (code === 0) {
-                    const finalCount = isClone ? totalFileCount : changeFileCount;
+                    let fileCount = 0;
+                    
+                    if (isPull) {
+                        const changeMatch = outputData.match(/(\d+)\s+files?\s+changed/);
+                        if (changeMatch) {
+                            fileCount = parseInt(changeMatch[1]);
+                        }
+                        
+                        if (fileCount === 0) {
+                            const insertMatch = outputData.match(/(\d+)\s+insertions?/);
+                            const deleteMatch = outputData.match(/(\d+)\s+deletions?/);
+                            if (insertMatch || deleteMatch) {
+                                fileCount = 1;
+                            }
+                        }
+                    } else if (isClone) {
+                        try {
+                            if (fs.existsSync(repoPath)) {
+                                fileCount = this.countFiles(repoPath);
+                            }
+                        } catch (err) {
+                            console.error('统计文件数量失败:', err);
+                        }
+                    }
+                    
                     resolve({
                         success: true,
                         message: '操作成功',
-                        fileCount: finalCount > 0 ? finalCount : 0
+                        fileCount: fileCount,
+                        output: outputData
                     });
                 } else {
                     resolve({
                         success: false,
                         message: `git命令执行失败（退出码：${code}）`,
-                        fileCount: 0
+                        fileCount: 0,
+                        output: outputData
                     });
                 }
             });
@@ -107,10 +121,31 @@ export class ImageUpdate extends plugin {
                 resolve({
                     success: false,
                     message: `执行git命令出错：${err.message}`,
-                    fileCount: 0
+                    fileCount: 0,
+                    output: outputData
                 });
             });
         });
+    }
+
+    countFiles(dir) {
+        let count = 0;
+        try {
+            const files = fs.readdirSync(dir);
+            for (const file of files) {
+                const filePath = path.join(dir, file);
+                const stat = fs.statSync(filePath);
+                if (stat.isDirectory()) {
+                    if (file === '.git') continue;
+                    count += this.countFiles(filePath);
+                } else {
+                    count++;
+                }
+            }
+        } catch (err) {
+            console.error('统计文件失败:', err);
+        }
+        return count;
     }
 
     async pullOrCloneRepo(force = false) {
@@ -124,12 +159,14 @@ export class ImageUpdate extends plugin {
                     await this.e.reply('检测到已有仓库，执行强制更新（重置本地修改）...');
                     const resetResult = await this.executeGitCommand('git reset --hard HEAD', repoPath);
                     if (!resetResult.success) return resetResult;
+                    
+                    await this.executeGitCommand('git clean -fd', repoPath);
                 }
                 await this.e.reply('开始拉取最新仓库内容...');
-                return this.executeGitCommand('git pull', repoPath, false);
+                return this.executeGitCommand('git pull --stat', repoPath, { isPull: true });
             } else {
                 await this.e.reply('首次安装，开始克隆仓库（可能需要几秒）...');
-                return this.executeGitCommand(`git clone ${repoUrl} ${repoName}`, profilePath, true);
+                return this.executeGitCommand(`git clone ${repoUrl} ${repoName}`, profilePath, { isClone: true });
             }
         } catch (err) {
             return { success: false, message: `仓库操作出错：${err.message}`, fileCount: 0 };
@@ -166,19 +203,25 @@ export class ImageUpdate extends plugin {
         const result = await this.pullOrCloneRepo(isForce);
 
         if (result.success) {
-            const isFirstInstall = !fs.existsSync(repoPath) ? false : (fs.readdirSync(repoPath).length === 0);
-            const firstTip = isFirstInstall 
-                ? `图片加量包首次安装成功~共下载了${result.fileCount}个图片/文件！` 
-                : `图片加量包更新成功~报告主人，此次更新了${result.fileCount}个图片/文件~`;
-            
-            await this.e.reply(firstTip);
-            await this.e.reply('角色图片加量包安装/更新成功！后续可通过 #不羡仙图像更新 命令再次更新');
+            if (result.fileCount > 0) {
+                const isFirstInstall = !fs.existsSync(repoPath) ? false : (fs.readdirSync(repoPath).length === 0);
+                const firstTip = isFirstInstall 
+                    ? `图片加量包首次安装成功~共下载了${result.fileCount}个图片/文件！` 
+                    : `图片加量包更新成功~报告主人，此次更新了${result.fileCount}个图片/文件~`;
+                
+                await this.e.reply(firstTip);
+                await this.e.reply('角色图片加量包安装/更新成功！后续可通过 #不羡仙图像更新 命令再次更新');
+            } else {
+                await this.e.reply('已经是最新版本了，没有需要更新的文件~');
+            }
         } else {
             const reason = this.analyzeErrorReason(result.message);
             const tip = fs.existsSync(repoPath) 
                 ? `更新失败！【${reason}】\n建议：1.检查网络 2.使用「#不羡仙图像强制更新」重试` 
                 : `角色图片加量包安装失败！原因：【${reason}】`;
             await this.e.reply(tip);
+            
+            console.error('Git操作失败详情:', result.output);
         }
 
         return true;
