@@ -65,7 +65,7 @@ export class ImageUpdate extends plugin {
             }
 
             await execAsync(`git clone ${this.repoUrl} "${this.repoPath}"`, { 
-                timeout: 120000 
+                timeout: 1200000 
             })
 
             if (!fs.existsSync(this.repoPath)) {
@@ -100,7 +100,7 @@ export class ImageUpdate extends plugin {
 
             const { stdout } = await execAsync('git pull', { 
                 cwd: this.repoPath,
-                timeout: 120000 
+                timeout: 1200000 
             })
 
             if (stdout.includes('Already up to date') || stdout.includes('已经是最新的')) {
