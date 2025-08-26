@@ -20,7 +20,7 @@ export class ImageUpdate extends plugin {
                 }
             ]
         })
-        this.repoUrl = 'https://gitcode.com/ymoan/normal-character.git' //gitcode源加速下载（可更换为github源库）
+        this.repoUrl = 'https://gitcode.com/Ymoano/normal-character.git' //gitcode源加速下载（可更换为github源库）
         // this.repoUrl = 'https://github.com/ymoan/normal-character.git' //github源库【优先更新】
         this.profilePath = path.join(process.cwd(), 'plugins', 'miao-plugin', 'resources', 'profile')
         this.repoPath = path.join(this.profilePath, 'normal-character')
