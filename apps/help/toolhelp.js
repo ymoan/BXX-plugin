@@ -7,8 +7,8 @@ import _ from 'lodash'
 export class ToolHelp extends plugin {
     constructor() {
         super({
-            name: '[BXX-plugin] 工具帮助',
-            dsc: '[BXX-plugin] 工具相关帮助功能',
+            name: '不羡仙:工具帮助',
+            dsc: '工具相关帮助功能',
             event: 'message',
             priority: 1,
             rule: [
