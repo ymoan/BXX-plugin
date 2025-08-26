@@ -7,8 +7,8 @@ import _ from 'lodash'
 export class setting extends plugin {
     constructor() {
         super({
-            name: '[BXX-plugin] 帮助',
-            dsc: '[BXX-plugin] 帮助',
+            name: '不羡仙:帮助',
+            dsc: '不羡仙帮助',
             event: 'message',
             priority: 1,
             rule: [
