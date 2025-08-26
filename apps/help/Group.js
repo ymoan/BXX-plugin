@@ -7,8 +7,8 @@ import _ from 'lodash'
 export class GroupHelp extends plugin {
     constructor() {
         super({
-            name: '[BXX-plugin] 群组帮助',
-            dsc: '[BXX-plugin] 群组相关帮助功能',
+            name: '不羡仙:管理帮助',
+            dsc: '群组相关帮助功能',
             event: 'message',
             priority: 1,
             rule: [
