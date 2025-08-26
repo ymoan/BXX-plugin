@@ -7,8 +7,8 @@ import _ from 'lodash'
 export class WebHelp extends plugin {
     constructor() {
         super({
-            name: '[BXX-plugin] 站长帮助',
-            dsc: '[BXX-plugin] 站长相关帮助功能',
+            name: '不羡仙:站长帮助',
+            dsc: '站长相关帮助功能',
             event: 'message',
             priority: 1,
             rule: [{
