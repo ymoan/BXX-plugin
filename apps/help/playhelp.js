@@ -7,8 +7,8 @@ import _ from 'lodash'
 export class PlayHelp extends plugin {
     constructor() {
         super({
-            name: '[BXX-plugin] 娱乐帮助',
-            dsc: '[BXX-plugin] 娱乐相关帮助功能',
+            name: '不羡仙:娱乐帮助',
+            dsc: '娱乐相关帮助功能',
             event: 'message',
             priority: 1,
             rule: [
