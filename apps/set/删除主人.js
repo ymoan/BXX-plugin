@@ -6,7 +6,7 @@ import yaml from 'yaml'
 export class delMaster extends plugin {
   constructor() {
     super({
-      name: '[BXX-plugin] 删除主人',
+      name: '不羡仙:删除主人',
       dsc: '快捷删除主人',
       event: 'message',
       priority: 100,
