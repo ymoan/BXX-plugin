@@ -12,7 +12,7 @@ try {
 export class xiezhen extends plugin {
   constructor() {
     super({
-      name: '不羡仙写真图',
+      name: '不羡仙:写真图',
       dsc: '原神星铁写真图片获取',
       event: 'message',
       priority: -1000,
