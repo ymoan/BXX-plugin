@@ -6,7 +6,7 @@ import axios from 'axios';
 export default class extends plugin {
     constructor() {
         super({
-            name: '网站信息查询',
+            name: '不羡仙:网站信息查询',
             dsc: '获取网站标题、描述和Logo',
             event: 'message',
             priority: 5000,
