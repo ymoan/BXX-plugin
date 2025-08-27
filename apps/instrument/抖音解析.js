@@ -6,7 +6,7 @@ import axios from 'axios';
 export class DouyinParser extends plugin {
   constructor() {
     super({
-      name: '抖音解析',
+      name: '不羡仙:抖音解析',
       dsc: '解析抖音视频/图集内容',
       event: 'message',
       priority: 500,
