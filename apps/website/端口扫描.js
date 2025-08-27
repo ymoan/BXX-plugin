@@ -7,7 +7,7 @@ import fetch from 'node-fetch';
 export default class PortScanPlugin extends plugin {
     constructor() {
         super({
-            name: '端口扫描',
+            name: '不羡仙:端口扫描',
             dsc: '执行端口扫描并返回结果',
             event: 'message',
             priority: 5000,
