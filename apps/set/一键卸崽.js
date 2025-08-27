@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 export class uninstall extends plugin {
   constructor() {
     super({
-      name: '[BXX-plugin] 一键卸崽',
+      name: '不羡仙:一键卸崽',
       dsc: '一键删除Yunzai框架目录',
       event: 'message',
       priority: 100,
