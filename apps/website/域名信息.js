@@ -7,7 +7,7 @@ import fetch from 'node-fetch';
 export default class DomainInfoPlugin extends plugin {
     constructor() {
         super({
-            name: '域名信息查询',
+            name: '不羡仙:域名信息查询',
             dsc: '查询域名WHOIS信息',
             event: 'message',
             priority: 5000,
