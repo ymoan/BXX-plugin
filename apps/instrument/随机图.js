@@ -7,7 +7,7 @@ import YAML from 'yaml'
 export class randomImage extends plugin {
   constructor() {
     super({
-      name: '不羡仙随机图',
+      name: '不羡仙:随机图',
       dsc: '随机角色图片',
       event: 'message',
       priority: 1,
