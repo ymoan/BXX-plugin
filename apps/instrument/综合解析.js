@@ -6,7 +6,7 @@ import axios from 'axios';
 export class MultiPlatformParser extends plugin {
   constructor() {
     super({
-      name: '综合解析',
+      name: '不羡仙:综合解析',
       dsc: '解析多个平台的视频/图文内容',
       event: 'message',
       priority: 500,
