@@ -7,7 +7,7 @@ import axios from 'axios';
 export default class SendEmail extends plugin {
     constructor() {
         super({
-            name: '发送邮件',
+            name: '不羡仙:发送邮件',
             dsc: '通过指令发送邮件',
             event: 'message',
             priority: 5000,
