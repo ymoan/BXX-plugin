@@ -6,7 +6,7 @@ import yaml from 'yaml'
 export class setMaster extends plugin {
   constructor() {
     super({
-      name: '[BXX-plugin] 设置主人',
+      name: '不羡仙:设置主人',
       dsc: '快捷设置主人',
       event: 'message',
       priority: 100,
