@@ -12,8 +12,8 @@ const __dirname = dirname(__filename);
 export class LFTParse extends plugin {
   constructor() {
     super({
-      name: '老福特解析',
-      dsc: '解析Lofter文章并下载图片~',
+      name: '不羡仙:老福特解析',
+      dsc: '解析Lofter文章并下载图片',
       event: 'message',
       priority: 5000,
       rule: [
