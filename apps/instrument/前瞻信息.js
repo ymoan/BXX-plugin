@@ -20,9 +20,14 @@ export class ForwardInfo extends plugin {
                 fnc: 'queryForwardInfo' 
             }]
         });
-        
-        this.cleanupDelay = 40000; 
-        
+
+        this.cleanupDelay = 30000;
+        this.screenshotOptions = {
+            quality: 70,
+            maxWidth: 1000,
+            maxHeight: 8000
+        };
+
         this.baseDir = path.resolve(__dirname, '../../');
         this.ensureDirs();
         this.commandGameMap = {
@@ -31,15 +36,15 @@ export class ForwardInfo extends plugin {
             '#绝区零前瞻': '绝区零'  
         };
     }
-    
+
     get apiFilePath() {
         return path.join(this.baseDir, 'data/API/QZXX.yaml');
     }
-    
+
     get uploadDir() {
         return path.join(this.baseDir, 'uploads');
     }
-    
+
     ensureDirs() {
         const dirs = [this.uploadDir, path.dirname(this.apiFilePath)];
         dirs.forEach(dir => {
@@ -48,7 +53,7 @@ export class ForwardInfo extends plugin {
             }
         });
     }
-    
+
     async queryForwardInfo(e) {
         const command = e.msg.trim();
         const game = this.commandGameMap[command];
@@ -74,7 +79,7 @@ export class ForwardInfo extends plugin {
                 return await e.reply('API返回异常');
             }
             
-            imgPath = path.join(this.uploadDir, `${game}_${Date.now()}.png`);
+            imgPath = path.join(this.uploadDir, `${game}_${Date.now()}.jpg`);
             
             browser = await puppeteer.launch({
                 headless: true,
@@ -97,7 +102,7 @@ export class ForwardInfo extends plugin {
         }
         return true;
     }
-    
+
     async parseApiConfig() {
         if (!fs.existsSync(this.apiFilePath)) throw new Error('API配置文件不存在');
         try {
@@ -109,7 +114,7 @@ export class ForwardInfo extends plugin {
             throw new Error('读取API配置失败: ' + err.message);
         }
     }
-    
+
     async fetchForwardData(url) {
         try {
             const response = await axios.get(url, {
@@ -121,11 +126,14 @@ export class ForwardInfo extends plugin {
             throw new Error('请求前瞻信息API失败: ' + err.message);
         }
     }
-    
+
     async captureScreenshot(browser, url, imgPath) {
         const page = await browser.newPage();
         try {
-            await page.setViewport({ width: 1200, height: 800 });
+            await page.setViewport({ 
+                width: this.screenshotOptions.maxWidth, 
+                height: 800 
+            });
             await page.setDefaultNavigationTimeout(60000);
             
             await page.goto(url, {
@@ -137,16 +145,31 @@ export class ForwardInfo extends plugin {
             await this.scrollPage(page);
             await page.waitForNetworkIdle({ idleTime: 1000, timeout: 10000 });
             
+            const pageHeight = await page.evaluate(() => {
+                return Math.max(
+                    document.body.scrollHeight,
+                    document.documentElement.scrollHeight
+                );
+            });
+            
+            const captureHeight = Math.min(pageHeight, this.screenshotOptions.maxHeight);
+            
             await page.screenshot({
                 path: imgPath,
-                fullPage: true,
-                captureBeyondViewport: true
+                type: 'jpeg',
+                quality: this.screenshotOptions.quality,
+                clip: {
+                    x: 0,
+                    y: 0,
+                    width: this.screenshotOptions.maxWidth,
+                    height: captureHeight
+                }
             });
         } finally {
             await page.close();
         }
     }
-    
+
     async waitForContent(page) {
         const maxWaitTime = 15000;
         const startTime = Date.now();
@@ -171,24 +194,21 @@ export class ForwardInfo extends plugin {
             await new Promise(resolve => setTimeout(resolve, 500));
         }
     }
-    
+
     async scrollPage(page) {
         try {
             const bodyHeight = await page.evaluate(() => {
                 return Math.max(
                     document.body.scrollHeight,
-                    document.documentElement.scrollHeight,
-                    document.body.offsetHeight,
-                    document.documentElement.offsetHeight,
-                    document.body.clientHeight,
-                    document.documentElement.clientHeight
+                    document.documentElement.scrollHeight
                 );
             });
             
+            const limitedHeight = Math.min(bodyHeight, this.screenshotOptions.maxHeight);
             const viewportHeight = 800;
             let currentPosition = 0;
             
-            while (currentPosition < bodyHeight) {
+            while (currentPosition < limitedHeight) {
                 currentPosition += viewportHeight;
                 await page.evaluate((position) => {
                     window.scrollTo(0, position);
@@ -201,7 +221,7 @@ export class ForwardInfo extends plugin {
             });
         } catch (e) {}
     }
-    
+
     async sendResult(e, data, imgPath) {
         const msg = [
             `前瞻信息获取成功！`,
@@ -216,7 +236,9 @@ export class ForwardInfo extends plugin {
         try {
             if (fs.existsSync(imgPath)) {
                 const stats = fs.statSync(imgPath);
-                if (stats.size > 0) {
+                if (stats.size > 10 * 1024 * 1024) {
+                    await e.reply(`截图较大(${Math.round(stats.size/1024/1024)}MB)，可能无法发送，建议直接访问链接查看`);
+                } else if (stats.size > 0) {
                     await e.reply(segment.image(imgPath));
                 } else {
                     await e.reply('截图生成失败，但前瞻信息已获取');
@@ -229,7 +251,7 @@ export class ForwardInfo extends plugin {
             await e.reply('截图发送失败，但前瞻信息已获取');
         }
     }
-    
+
     async cleanupResources(browser, imgPath, screenshotTaken) {
         if (browser) {
             try { 
