@@ -7,7 +7,7 @@ import fetch from 'node-fetch';
 export default class QRCodeGenerator extends plugin {
     constructor() {
         super({
-            name: '二维码生成',
+            name: '不羡仙:二维码生成',
             dsc: '根据用户输入的文本生成二维码',
             event: 'message',
             priority: 5000,
