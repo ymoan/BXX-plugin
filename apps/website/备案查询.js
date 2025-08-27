@@ -7,7 +7,7 @@ import fetch from 'node-fetch';
 export default class ICPQueryPlugin extends plugin {
     constructor() {
         super({
-            name: '网站备案查询',
+            name: '不羡仙:网站备案查询',
             dsc: '查询网站备案信息',
             event: 'message',
             priority: 5000,
