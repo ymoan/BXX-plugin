@@ -1,11 +1,5 @@
-# 邮箱配置文件 支持国内大部分邮箱/使用您自己的邮箱，出现任何问题概不负责
-# SMTP端
 smtp:
-# 邮箱账号
 smtp_user:
-# 邮箱密钥
 smtp_password:
-# 发件端口
 smtp_port:
-# 发件名称，例如某某交流群/某人
 webname:
