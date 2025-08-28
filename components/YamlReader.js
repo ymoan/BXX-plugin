@@ -1,9 +1,16 @@
 import fs from 'fs'
-import YAML from 'yaml'
-import _ from 'lodash'
+import YAML, { YAMLMap } from 'yaml'
+import lodash from 'lodash'
 import chokidar from 'chokidar'
 
 export default class YamlReader {
+
+  // 配置文件数字key
+  static CONFIG_INTEGER_KEY = 'INTEGER__'
+
+  // 配置文件强制覆盖key
+  static CONFIG_FORCE_OVERLAY_KEY = 'FORCE_OVERLAY__'
+
   /**
    * 读写yaml文件
    *
@@ -17,8 +24,12 @@ export default class YamlReader {
   }
 
   initYaml() {
-    // parseDocument 将会保留注释
-    this.document = YAML.parseDocument(fs.readFileSync(this.yamlPath, 'utf8'))
+    try {
+      // parseDocument 将会保留注释
+      this.document = YAML.parseDocument(fs.readFileSync(this.yamlPath, 'utf8'))
+    } catch (error) {
+      throw error
+    }
     if (this.isWatch && !this.watcher) {
       this.watcher = chokidar.watch(this.yamlPath).on('change', () => {
         if (this.isSave) {
@@ -30,7 +41,6 @@ export default class YamlReader {
     }
   }
 
-  /** 返回读取的对象 */
   get jsonData() {
     if (!this.document) {
       return null
@@ -38,32 +48,74 @@ export default class YamlReader {
     return this.document.toJSON()
   }
 
-  /* 检查集合是否包含key的值 */
   has(keyPath) {
     return this.document.hasIn(keyPath.split('.'))
   }
 
-  /* 返回key的值 */
   get(keyPath) {
-    return _.get(this.jsonData, keyPath)
+    return lodash.get(this.jsonData, keyPath)
   }
 
-  /* 修改某个key的值 */
   set(keyPath, value) {
-    this.document.setIn([keyPath], value)
+    this.document.setIn(keyPath.split('.'), value)
     this.save()
   }
 
-  /* 删除key */
   delete(keyPath) {
     this.document.deleteIn(keyPath.split('.'))
     this.save()
   }
 
-  // 数组添加数据
-  addIn(keyPath, value) {
-    this.document.addIn(keyPath.split('.'), value)
+  /**
+   * 设置 document 的数据并保存（递归式）
+   * @param data 要写入的数据
+   */
+  setData(data) {
+    this.setDataRecursion(data, [])
     this.save()
+  }
+
+  /**
+   * 递归式设置数据，但不保存
+   * @param data
+   * @param {string[]} parentKeys
+   */
+  setDataRecursion(data, parentKeys) {
+    if (parentKeys.length > 0) {
+      let lastKey = parentKeys.pop()
+      if (typeof lastKey === 'string' && lastKey.startsWith(YamlReader.CONFIG_FORCE_OVERLAY_KEY)) {
+        lastKey = lastKey.replace(YamlReader.CONFIG_FORCE_OVERLAY_KEY, '')
+        this.document.setIn(this.mapParentKeys([...parentKeys, lastKey]), data)
+        // 强制覆盖，不再递归
+        return
+      }
+      parentKeys.push(lastKey)
+    }
+
+    if (Array.isArray(data)) {
+      this.document.setIn(this.mapParentKeys(parentKeys), data)
+    } else if (typeof data === 'object' && data !== null) {
+      const checkKeys = this.mapParentKeys(parentKeys)
+      if (!(this.document.getIn(checkKeys) instanceof YAMLMap)) {
+        this.document.setIn(checkKeys, new YAMLMap())
+      }
+      for (const [key, value] of Object.entries(data)) {
+        this.setDataRecursion(value, parentKeys.concat([key]))
+      }
+    } else {
+      parentKeys = this.mapParentKeys(parentKeys)
+      this.document.setIn(parentKeys, data)
+    }
+  }
+
+  // 将数字key转为number类型，防止出现引号
+  mapParentKeys(parentKeys) {
+    return parentKeys.map((k) => {
+      if (k.startsWith(YamlReader.CONFIG_INTEGER_KEY)) {
+        return Number(k.replace(YamlReader.CONFIG_INTEGER_KEY, '')) || String(k.replace(YamlReader.CONFIG_INTEGER_KEY, ''))
+      }
+      return k
+    })
   }
 
   // 彻底删除某个key
@@ -81,3 +133,4 @@ export default class YamlReader {
     fs.writeFileSync(this.yamlPath, yaml, 'utf8')
   }
 }
+
