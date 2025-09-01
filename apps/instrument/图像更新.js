@@ -20,10 +20,10 @@ export class ImageUpdate extends plugin {
                 }
             ]
         })
-        this.repoUrl = 'https://gitcode.com/Ymoano/normal-character.git' //gitcode源加速下载（可更换为github源库）
-        // this.repoUrl = 'https://github.com/ymoan/normal-character.git' //github源库【优先更新】
+        this.repoUrl = 'https://gitcode.com/Ymoano/normal-character.git'
         this.profilePath = path.join(process.cwd(), 'plugins', 'miao-plugin', 'resources', 'profile')
         this.repoPath = path.join(this.profilePath, 'normal-character')
+        this.defaultBranch = 'master'
     }
 
     async imageUpdate(e) {
@@ -94,28 +94,43 @@ export class ImageUpdate extends plugin {
             }
 
             if (isForce) {
+                await e.reply('执行强制更新，将重新克隆仓库...')
                 await this.forceRemoveDir(this.repoPath)
                 return await this.installImage(e, true)
             }
 
+            await e.reply('正在检查远程仓库更新...')
+            await execAsync('git fetch', { 
+                cwd: this.repoPath,
+                timeout: 600000 
+            })
+            
+            const { stdout: diffOutput } = await execAsync(
+                `git diff HEAD origin/${this.defaultBranch}`, 
+                { cwd: this.repoPath }
+            )
+            
+            if (!diffOutput) {
+                await e.reply('不羡仙角色图像已是最新版，暂无更新内容~')
+                return true
+            }
+
+            await e.reply('发现更新，正在拉取最新内容...')
             const { stdout } = await execAsync('git pull', { 
                 cwd: this.repoPath,
                 timeout: 1200000 
             })
 
-            if (stdout.includes('Already up to date') || stdout.includes('已经是最新的')) {
-                await e.reply('不羡仙角色图像已是最新版，暂无更新内容~')
-            } else {
-                const changeCount = this.extractChangeCount(stdout)
-                await e.reply(`不羡仙角色图片加量包更新成功~报告主人，更新成功，此次更新了${changeCount}个图片/文件~`)
-                await e.reply('不羡仙角色图片加量包安装成功！您后续也可以通过 #不羡仙图像更新 命令来更新图像')
-            }
+            const changeCount = this.extractChangeCount(stdout)
+            await e.reply(`不羡仙角色图片加量包更新成功~此次更新了${changeCount}个图片/文件~`)
+            await e.reply('您后续也可以通过 #不羡仙图像更新 命令来获取最新图像')
             
         } catch (error) {
+            console.error('更新错误详情:', error)
             if (isForce) {
                 await this.handleError(e, error, '强制更新')
             } else {
-                await e.reply('更新失败！可能原因：仓库文件冲突。请使用「#不羡仙图像强制更新」重试！')
+                await e.reply('更新失败！可能原因：仓库文件冲突或网络问题。请使用「#不羡仙图像强制更新」重试！')
             }
         }
         return true
@@ -139,13 +154,13 @@ export class ImageUpdate extends plugin {
         let reason = '未知错误'
         
         if (error.message.includes('timeout')) {
-            reason = '网络超时'
+            reason = '网络超时，请检查网络连接'
         } else if (error.message.includes('exists')) {
             reason = '文件已存在'
         } else if (error.message.includes('not found') || error.message.includes('找不到')) {
             reason = '资源不存在'
         } else if (error.message.includes('git')) {
-            reason = 'Git操作失败'
+            reason = 'Git操作失败，请确保已安装Git'
         } else if (error.message.includes('空')) {
             reason = '仓库内容为空'
         } else {
@@ -182,15 +197,20 @@ export class ImageUpdate extends plugin {
     }
 
     extractChangeCount(gitOutput) {
-        const changesMatch = gitOutput.match(/(\d+) files? changed/)
+        const changesMatch = gitOutput.match(/(\d+) files? changed/) || 
+                             gitOutput.match(/(\d+) 个文件被更改/)
+        
         if (changesMatch && changesMatch[1]) {
             return changesMatch[1]
         }
         
-        const insertMatch = gitOutput.match(/(\d+) insertion/)
+        const insertMatch = gitOutput.match(/(\d+) insertion/) ||
+                            gitOutput.match(/(\d+) 次插入/)
+        
         if (insertMatch && insertMatch[1]) {
             return insertMatch[1]
         }
-        return '（反正就是更新了，具体是多少个没统计到）'
+        
+        return '若干'
     }
 }
