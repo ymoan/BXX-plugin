@@ -20,18 +20,11 @@ export default class extends plugin {
     }
 
     async getWebsiteInfo(e) {
-        console.log(`收到命令: ${e.msg}`);
-        console.log(`匹配结果: ${JSON.stringify(e.match)}`);
-        
-        let url = null;
-        if (e.match && e.match[1]) {
-            url = e.match[1];
-        } else {
+        let url = e.match?.[1];
+        if (!url) {
             const urlRegex = /(https?:\/\/[^\s]+)/;
             const match = e.msg.match(urlRegex);
-            if (match && match[0]) {
-                url = match[0];
-            }
+            url = match?.[0];
         }
         
         if (!url) {
@@ -39,8 +32,6 @@ export default class extends plugin {
             return true;
         }
 
-        console.log(`提取链接: ${url}`);
-        
         if (!(await this.checkPermission(e))) {
             await e.reply('暂无权限，只有主人才能操作');
             return true;
@@ -54,10 +45,8 @@ export default class extends plugin {
             }
 
             const apiFullUrl = `${apiUrl}?apikey=${apiKey}&url=${encodeURIComponent(url)}`;
-            console.log(`请求API: ${apiFullUrl}`);
             const response = await axios.get(apiFullUrl, { timeout: 15000 });
             const res = response.data;
-            console.log(`API响应: ${JSON.stringify(res)}`);
 
             if (res.code !== 1) {
                 return await this.handleApiError(res, e);
@@ -65,7 +54,7 @@ export default class extends plugin {
 
             await this.sendWebsiteInfo(e, res.data, url);
         } catch (err) {
-            console.error(`网站信息查询失败: ${err}`);
+            console.error('网站信息查询失败:', err.message);
             await e.reply('网站信息查询失败，请稍后重试或检查链接有效性');
         }
         return true;
@@ -81,20 +70,14 @@ export default class extends plugin {
             if (fs.existsSync(adminPath)) {
                 const adminConfig = fs.readFileSync(adminPath, 'utf8');
                 const wzxxAllMatch = adminConfig.match(/WZXXALL:\s*(true|false)/i); 
-                
                 if (wzxxAllMatch && wzxxAllMatch[1].toLowerCase() === 'true') {
-                    console.log('权限检查: 所有人可用（WZXXALL为true）');
                     return true;
                 }
-            } else {
-                console.error('[网站信息权限] admin.yaml文件不存在，默认关闭所有人可用');
             }
-
-            console.log(`权限检查: 验证主人权限（e.isMaster=${e.isMaster}）`);
+            
             return e.isMaster;
-
         } catch (err) {
-            console.error('网站信息权限检查失败:', err);
+            console.error('权限检查失败:', err.message);
             return e.isMaster;
         }
     }
@@ -126,7 +109,7 @@ export default class extends plugin {
             
             return { apiUrl, apiKey };
         } catch (err) {
-            console.error('读取API配置失败:', err);
+            console.error('读取API配置失败:', err.message);
             return { apiUrl: null, apiKey: null };
         }
     }
@@ -149,29 +132,27 @@ export default class extends plugin {
             process.cwd(), 
             'plugins/BXX-plugin/uploads'
         );
+        
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
         }
 
         const logoUrl = data.favicon || '';
         let logoPath = '';
+        
         if (logoUrl) {
             try {
                 let validUrl = logoUrl;
                 if (!validUrl.startsWith('http')) {
-                    if (validUrl.startsWith('//')) {
-                        validUrl = 'https:' + validUrl;
-                    } else {
-                        const baseUrl = new URL(url).origin;
-                        validUrl = baseUrl + (validUrl.startsWith('/') ? validUrl : '/' + validUrl);
-                    }
+                    validUrl = validUrl.startsWith('//') ? 
+                        'https:' + validUrl : 
+                        new URL(url).origin + (validUrl.startsWith('/') ? validUrl : '/' + validUrl);
                 }
                 
-                console.log(`处理后的Logo URL: ${validUrl}`);
-                
-                const ext = path.extname(validUrl) || '.png';
+                const extMatch = validUrl.match(/\.(\w+)(\?|$)/);
+                const ext = extMatch ? `.${extMatch[1]}` : '.png';
+
                 logoPath = path.join(uploadDir, `website_logo_${Date.now()}${ext}`);
-                
                 const response = await axios.get(validUrl, {
                     responseType: 'arraybuffer',
                     timeout: 15000,
@@ -181,9 +162,9 @@ export default class extends plugin {
                 });
                 
                 fs.writeFileSync(logoPath, response.data);
-                console.log(`Logo保存到: ${logoPath}`);
             } catch (err) {
-                console.error('Logo下载失败:', err);
+                console.error('Logo处理失败:', err.message);
+                logoPath = '';
             }
         }
 
@@ -196,19 +177,15 @@ export default class extends plugin {
 
         if (logoPath && fs.existsSync(logoPath)) {
             msg.push(segment.image(`file:///${logoPath}`));
+            setTimeout(() => {
+                fs.unlink(logoPath, (err) => {
+                    if (err) console.error('临时文件删除失败:', err.message);
+                });
+            }, 5000);
         } else {
             msg.push('⚠️ 网站Logo获取失败');
         }
 
         await e.reply(msg);
-        console.log('网站信息已发送');
-        if (logoPath && fs.existsSync(logoPath)) {
-            setTimeout(() => {
-                fs.unlink(logoPath, (err) => {
-                    if (err) console.error('删除临时文件失败:', err);
-                    else console.log(`临时文件已删除: ${logoPath}`);
-                });
-            }, 5000);
-        }
     }
 }
