@@ -97,14 +97,14 @@ export default class extends plugin {
             
             if (fs.existsSync(apiPath)) {
                 const apiConfig = fs.readFileSync(apiPath, 'utf8');
-                const apiMatch = apiConfig.match(/WZXXAPI:\s*"([^"]+)"/);
-                apiUrl = apiMatch ? apiMatch[1] : null;
+                const apiMatch = apiConfig.match(/WZXXAPI:\s*["']?([^"'\s#]+)["']?/i);
+                apiUrl = apiMatch ? apiMatch[1].trim() : null;
             }
             
             if (fs.existsSync(keyPath)) {
                 const keyConfig = fs.readFileSync(keyPath, 'utf8');
-                const keyMatch = keyConfig.match(/WZXXKEY:\s*"([^"]+)"/);
-                apiKey = keyMatch ? keyMatch[1] : null;
+                const keyMatch = keyConfig.match(/WZXXKEY:\s*["']?([^"'\s#]+)["']?/i);
+                apiKey = keyMatch ? keyMatch[1].trim() : null;
             }
             
             return { apiUrl, apiKey };
