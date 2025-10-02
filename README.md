@@ -76,11 +76,13 @@
 [Miao-Yunzai](https://gitee.com/yoimiya-kokomi/Miao-Yunzai)😠
 [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)
 
-**API提供者：[云墨安API](https://api.ymoan.net/)**
-
 **部分代码/功能灵感借鉴：**
-
 [插件库](https://gitee.com/yhArcadia/Yunzai-Bot-plugins-index)
+
+**API提供者：[NathanAPI](https://api.nanyinet.com/)**
+# 😋贡献：
+### 排名以贡献先后为准，感谢您这些伟大的人对项目的贡献！
+1.[RainFoam0693](https://github.com/RainFoam0693)
 
 ****
 # 😍其他：
